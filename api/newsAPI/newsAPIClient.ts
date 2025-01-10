@@ -57,7 +57,7 @@ export default class NewsBot {
 
     private async sendNewsToAllChannels(): Promise<void> {
         try {
-            const news = await this.fetchNews();
+            let news = await this.fetchNews();
             const channel1 = await this.client.channels.fetch(
                 this.channel_id_test_channel
             );
@@ -71,6 +71,7 @@ export default class NewsBot {
             if (channel2 instanceof TextChannel) {
                 await channel2.send(news);
             }
+            news = "";
         } catch (err) {
             console.log(`Error sending news to channels: ${err}`);
         }

@@ -34,3 +34,4 @@ const commands = [
 const newsBot = new NewsBot(process.env.DISCORD_BOT_TOKEN!)
 
 newsBot.deployCommands(commands);
+newsBot.setupCommands()
