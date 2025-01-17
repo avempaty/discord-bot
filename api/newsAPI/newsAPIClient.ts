@@ -5,9 +5,10 @@ import {
     TextChannel,
     REST,
     Routes,
-    GatewayIntentBits,
     SlashCommandBuilder,
 } from "discord.js";
+import KafkaProducer from "../../kafka/kafkaProducer";
+
 dotenv.config();
 
 export type hackerNews = {
@@ -27,6 +28,7 @@ const rest = new REST({ version: "9" }).setToken(
 export default class NewsBot {
     private client: Client;
     private job: CronJob;
+    private kafkaProducer: KafkaProducer;
     private channel_id_test_channel = "1326033663472963584";
     private channel_id_tech_news = "1326981935716765878";
 
@@ -34,7 +36,7 @@ export default class NewsBot {
         this.client = new Client({
             intents: ["Guilds", "GuildMessages", "DirectMessages"],
         });
-
+        this.kafkaProducer = new KafkaProducer();
         this.initializeBot(token);
 
         this.job = new CronJob(
@@ -58,19 +60,18 @@ export default class NewsBot {
     private async sendNewsToAllChannels(): Promise<void> {
         try {
             let news = await this.fetchNews();
-            const channel1 = await this.client.channels.fetch(
-                this.channel_id_test_channel
-            );
-            if (channel1 instanceof TextChannel) {
-                await channel1.send(news);
-            }
 
-            const channel2 = await this.client.channels.fetch(
-                this.channel_id_tech_news
-            );
-            if (channel2 instanceof TextChannel) {
-                await channel2.send(news);
-            }
+            await this.kafkaProducer.sendNewsUpdate({
+                news,
+                channelId: this.channel_id_test_channel,
+            });
+            console.log("Sent message to test channel");
+
+            await this.kafkaProducer.sendNewsUpdate({
+                news,
+                channelId: this.channel_id_tech_news,
+            });
+            console.log("Sent message to Tech News Channel");
             news = "";
         } catch (err) {
             console.log(`Error sending news to channels: ${err}`);
@@ -113,12 +114,20 @@ export default class NewsBot {
                 url: article.url,
             });
         });
-        //console.log(list);
+
         newsListString =
             newsListString +
             list.map((news) => `**${news.title}**\n${news.url}\n\n`).join("");
         console.log(newsListString);
         return newsListString;
+    }
+
+    public async processNewsUpdate(newsUpdate: any) {
+        const { news, channelId } = JSON.parse(newsUpdate);
+        const channel = await this.client.channels.fetch(channelId);
+        if (channel instanceof TextChannel) {
+            await channel.send(news);
+        }
     }
 
     public async setupCommands(): Promise<void> {

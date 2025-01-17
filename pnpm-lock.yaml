@@ -14,6 +14,9 @@ dependencies:
   dotenv:
     specifier: ^16.4.7
     version: 16.4.7
+  kafkajs:
+    specifier: ^2.2.4
+    version: 2.2.4
 
 devDependencies:
   '@types/node':
@@ -439,6 +442,11 @@ packages:
     dependencies:
       resolve-pkg-maps: 1.0.0
     dev: true
+
+  /kafkajs@2.2.4:
+    resolution: {integrity: sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==}
+    engines: {node: '>=14.0.0'}
+    dev: false
 
   /lodash.snakecase@4.1.1:
     resolution: {integrity: sha512-QZ1d4xoBHYUeuouhEq3lk3Uq7ldgyFXGBhg04+oRLnIz8o9T65Eh+8YdroUwn846zchkA9yDsDl5CVVaV2nqYw==}
